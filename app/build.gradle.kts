@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 }
 
@@ -64,6 +65,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.gson.converter)
     implementation(libs.com.gson)
+
+    //Recycler View
+    implementation(libs.androidx.recyclerview)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

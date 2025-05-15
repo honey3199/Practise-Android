@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.demoapplication.data.LocalRepository
@@ -14,12 +16,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ListComposableViewModel @Inject constructor(private val repository: LocalRepository): ViewModel() {
+class ListComposableViewModel @Inject constructor(private val repository: LocalRepository) :
+    ViewModel() {
 
     val title: String = "H@nSh!!"
     private val TAG = "ListComposableViewModel"
 
     var remoteResponse by mutableStateOf<RemoteResponse>(RemoteResponse.Loading)
+        private set
+
+    private val _items = MutableLiveData<List<Item>>()
+    var items: LiveData<List<Item>> = _items
 
     init {
         insertItems()
@@ -27,7 +34,7 @@ class ListComposableViewModel @Inject constructor(private val repository: LocalR
         fetchDetailsFromRemote()
     }
 
-    private fun insertItems() = viewModelScope.launch(Dispatchers.IO) {
+    private fun insertItems() = viewModelScope.launch {
         repository.insertItems(
             listOf(
                 Item(itemID = 1, itemName = "item1"),
@@ -37,6 +44,8 @@ class ListComposableViewModel @Inject constructor(private val repository: LocalR
                 Item(itemID = 2, itemName = "item5"),
             )
         )
+
+        _items.postValue(repository.getItems())
     }
 
     private fun fetchDetailsFromRemote() = viewModelScope.launch(Dispatchers.IO) {
@@ -60,7 +69,7 @@ class ListComposableViewModel @Inject constructor(private val repository: LocalR
 }
 
 sealed interface RemoteResponse {
-    data object Loading: RemoteResponse
-    data class Error(val errorMessage: String): RemoteResponse
-    data class Success(val responseValue: String): RemoteResponse
+    data object Loading : RemoteResponse
+    data class Error(val errorMessage: String) : RemoteResponse
+    data class Success(val responseValue: String) : RemoteResponse
 }
