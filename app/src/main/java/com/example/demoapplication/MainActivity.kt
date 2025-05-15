@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.demoapplication.ui.features.listView.ListComposableViewModel
+import com.example.demoapplication.ui.features.listView.RemoteResponse
 import com.example.demoapplication.ui.theme.DemoApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,12 +23,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val message = when(val result = viewModel.remoteResponse) {
+            is RemoteResponse.Error -> result.errorMessage
+            RemoteResponse.Loading -> "Loading...!!!"
+            is RemoteResponse.Success -> result.responseValue
+        }
         enableEdgeToEdge()
         setContent {
             DemoApplicationTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = viewModel.title,
+                        name = message,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
